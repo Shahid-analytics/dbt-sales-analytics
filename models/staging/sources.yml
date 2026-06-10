@@ -1,0 +1,32 @@
+version: 2
+
+sources:
+  - name: olist
+    database: dbt_sales_db
+    schema: raw
+    description: "Raw Olist Brazilian E-Commerce data loaded from Kaggle"
+
+    tables:
+      - name: raw_orders
+        description: "All orders placed on the Olist platform"
+
+      - name: raw_order_items
+        description: "Individual items within each order"
+
+      - name: raw_customers
+        description: "Customer information including location"
+
+      - name: raw_products
+        description: "Product details including category and dimensions"
+
+      - name: raw_sellers
+        description: "Seller information including location"
+
+      - name: raw_order_payments
+        description: "Payment details for each order"
+
+      - name: raw_order_reviews
+        description: "Customer reviews and scores for orders"
+
+      - name: raw_product_category_name_translation
+        description: "Translation of product category names from Portuguese to English"

@@ -1,0 +1,19 @@
+# DBT
+target/
+dbt_packages/
+logs/
+
+# Sensitive
+profiles.yml
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/

@@ -1,0 +1,9 @@
+{% macro generate_surrogate_key(column_list) %}
+    md5(
+        concat_ws('|',
+            {% for col in column_list %}
+                cast({{ col }} as varchar){% if not loop.last %},{% endif %}
+            {% endfor %}
+        )
+    )
+{% endmacro %}

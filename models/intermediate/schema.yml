@@ -1,0 +1,76 @@
+version: 2
+
+models:
+  - name: int_orders_enriched
+    description: "Orders joined with customers and payments, enriched with delivery metrics"
+    columns:
+      - name: order_id
+        description: "Unique identifier for each order"
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Reference to the customer"
+        tests:
+          - not_null
+      - name: delivery_status
+        description: "On Time, Late or Pending"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['On Time', 'Late', 'Pending']
+
+  - name: int_order_items_enriched
+    description: "Order items joined with products, translations and sellers"
+    columns:
+      - name: order_id
+        description: "Reference to the parent order"
+        tests:
+          - not_null
+      - name: product_id
+        description: "Reference to the product"
+        tests:
+          - not_null
+      - name: seller_id
+        description: "Reference to the seller"
+        tests:
+          - not_null
+      - name: total_item_value
+        description: "Price plus freight value"
+        tests:
+          - not_null
+
+  - name: int_reviews_enriched
+    description: "Reviews joined with order data, enriched with sentiment"
+    columns:
+      - name: review_id
+        description: "Unique identifier for each review"
+        tests:
+          - not_null
+      - name: order_id
+        description: "Reference to the parent order"
+        tests:
+          - not_null
+      - name: review_sentiment
+        description: "Positive, Neutral or Negative"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Positive', 'Neutral', 'Negative']
+
+  - name: int_seller_performance
+    description: "Seller level aggregations including revenue, delivery and review metrics"
+    columns:
+      - name: seller_id
+        description: "Unique identifier for each seller"
+        tests:
+          - unique
+          - not_null
+      - name: total_orders
+        description: "Total number of orders fulfilled by the seller"
+        tests:
+          - not_null
+      - name: on_time_delivery_pct
+        description: "Percentage of orders delivered on time"
+        tests:
+          - not_null
