@@ -1,0 +1,72 @@
+name: DBT CI Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  dbt-ci:
+    name: Run DBT Build on Modified Models
+    runs-on: ubuntu-latest
+
+    env:
+      DBT_ACCOUNT: ${{ secrets.DBT_ACCOUNT }}
+      DBT_USER: ${{ secrets.DBT_USER }}
+      DBT_PASSWORD: ${{ secrets.DBT_PASSWORD }}
+      DBT_ROLE: ${{ secrets.DBT_ROLE }}
+      DBT_WAREHOUSE: ${{ secrets.DBT_WAREHOUSE }}
+      DBT_DATABASE: ${{ secrets.DBT_DATABASE }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install DBT
+        run: pip install dbt-snowflake
+
+      - name: Install DBT packages
+        run: dbt deps
+
+      - name: Create profiles.yml
+        run: |
+          mkdir -p ~/.dbt
+          cat <<EOF > ~/.dbt/profiles.yml
+          dbt_sales_analytics:
+            target: dev
+            outputs:
+              dev:
+                type: snowflake
+                account: ${{ secrets.DBT_ACCOUNT }}
+                user: ${{ secrets.DBT_USER }}
+                password: ${{ secrets.DBT_PASSWORD }}
+                role: ${{ secrets.DBT_ROLE }}
+                warehouse: ${{ secrets.DBT_WAREHOUSE }}
+                database: ${{ secrets.DBT_DATABASE }}
+                schema: dbt
+                threads: 4
+          EOF
+
+      - name: DBT Debug
+        run: dbt debug
+
+      - name: Download DBT artifacts from main branch
+        run: |
+          git fetch origin main
+          git checkout origin/main -- target/manifest.json || echo "No manifest found"
+
+      - name: DBT Build - Modified models only
+        run: |
+          dbt build --select state:modified+ \
+          --defer \
+          --state target/ \
+          || dbt build
+
+      - name: DBT Test
+        if: always()
+        run: dbt test
